@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title></title>
+<meta name="author" content="(Rami Chowdhury)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="http://127.0.0.1:8000/reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="http://127.0.0.1:8000/reveal.js/css/theme/night.css" id="theme"/>
+
+<link rel="stylesheet" href="http://127.0.0.1:8000/style.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://127.0.0.1:8000/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<section>
+<section id="slide-orgheadline1" data-background="./images/Fire_Blaze.jpg" data-background-transition="slide">
+<h2 id="orgheadline1"><code>import blaze</code></h2>
+<p>
+time for flexible data
+</p>
+
+<aside class="notes">
+<p>
+Hi everyone, I'm Rami, and I'm going to talk about ETL. Who loves ETL scripts?
+</p>
+
+<p>
+No one? OK, well, Blaze is a library that lets you avoid that sort of
+thing. Because I like structure in my presentations, I'm going to lay things out
+in advance: We'll take a look at what the library can do, why you might be
+interested, then delve a little into how it works and what other related work to
+take a look at.
+</p>
+
+<p>
+There will be links in the slides, and I'll make this (and the accompanying Jupyter
+notebook) available later on.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline2" data-background="./images/Ku4Vg2e.jpg" data-background-transition="slide">
+<h2 id="orgheadline2"><img src="./images/blaze_med.png" alt="blaze_med.png" /></h2>
+<blockquote nil>
+<p>
+Blaze presents a pleasant and familiar interface to us regardless of what
+computational solution or database we use (e.g. Spark, Impala, SQL databases,
+No-SQL data-stores, raw-files). One Blaze query can work across data ranging
+from a CSV file to a distributed database.
+</p>
+</blockquote>
+<aside class="notes">
+<p>
+I'm going to let the marketing spiel from the website do the talking for me for
+part of this.
+</p>
+
+<p>
+Now, you might be thinking &#x2013; OK, so one query works across different systems, but
+what form does that query take? Do we really need <span class="underline">another</span> DSL? Well, Blaze uses the
+NumPy / Pandas DataFrame syntax for the most part, and translates the operations
+to whatever makes sense for the underlying data store.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline3" data-background="./images/kinabalu-rainforest-borneo-mlsy-00455.jpg" data-background-transition="slide">
+<h2 id="orgheadline3">introducing kinabalu</h2>
+<p class="fragment fade-in">
+It's a bookstore! We've got:
+</p>
+<ul>
+<li class="fragment fade-in">books (Mongo)</li>
+<li class="fragment fade-in">users &amp; their libraries (Postgres)</li>
+<li class="fragment fade-in">purchase history (CSV)</li>
+<li class="fragment fade-in">server logs (HTTP)</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+Talks are no fun without examples! For the purposes of this talk, we're going to
+pretend we're working on an online bookstore named after a rainforest. We have:
+</p>
+<ul>
+<li>books in MongoDB, so we can manage them easily and serve them fast</li>
+<li>user profiles &amp; libraries in PostgreSQL, because we don't want to lose them</li>
+<li>a purchase history data dump, in CSV, because we're letting someone else
+handle payments</li>
+<li>web server logs, from Kibana or something &#x2013; we're accessing it in CSV format,
+but JSON is just as good a format (well, I say that, but in the process of preparing
+this talk I found a bug, which I've opened an issue for&#x2026;)</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline4" data-background="./images/data_visualization1.jpg" data-background-transition="slide">
+<h2 id="orgheadline4">let's look at it</h2>
+<p>
+<i>(open notebook, fiddle, watch things break&#x2026;)</i>
+</p>
+<aside class="notes">
+<p>
+Let's have a look at this data, by loading it all into Blaze, and doing some
+simple exploratory queries on it. This is the live-coding part of the talk,
+where things traditionally go horribly wrong. I've mitigated this by
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline5" data-background="./images/database_800.jpeg" data-background-transition="slide">
+<h2 id="orgheadline5">mixing it up</h2>
+<p>
+things get really interesting when you can query across data sources,
+as more and more people have to do
+</p>
+
+<p>
+<i>(open notebook again, see more things break&#x2026;)</i>
+</p>
+<aside class="notes">
+<p>
+Now, some of you might be wondering why it wasn't all in Postgres to begin
+with. It can handle all kinds of data (whatever Uber says). Or AWS Redshift.
+But this is more akin to a real-world scenario, where for lots of reasons
+things are in different places.
+</p>
+
+<p>
+This is where we find out some of the real power of Blaze, which is going
+to let us combine our data interestingly.
+</p>
+
+<p>
+(discuss notebook)
+Note: the queries are messy and complicated. This is what happens with data.
+Many people can make use of these conclusions &#x2013; even devops can use the download
+time insights to figure out whether it's worth setting up a node in AWS Alaska.
+</p>
+
+<p>
+A happy side effect of doing this in Blaze is that Blaze is optimizing our
+query for us, pushing down the query as far as it can into each backend, so
+that it has to do the least amount of work in-process.
+</p>
+
+<p>
+It's also worth noting that any of these queries can be trivially translated
+to fully run on the appropriate backend, so your analysis on a Pandas dataframe here
+can be executed on your Redshift cluster by changing a single parameter.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline6" data-background="./images/2009_3962573662_card_catalog.jpg" data-background-transition="slide">
+<h2 id="orgheadline6">backends</h2>
+<ul>
+<li>CSV</li>
+<li>HDF5</li>
+<li>SQL (using SQLAlchemy)</li>
+<li>JSON</li>
+<li>MongoDB</li>
+<li>HTTP URIs (if the resource is in a supported format)</li>
+<li>Spark (PySpark, SparkSQL)</li>
+<li>bcolz</li>
+
+</ul>
+<aside class="notes">
+<p>
+Blaze currently supports a range of file formats and storage systems &#x2013; as you can see,
+it's by no means comprehensive, but it covers most if not all of the data we often deal
+with on a regular basis. Adding support for another backend can be easy &#x2013; we'll look at
+an easy example shortly &#x2013; or a big undertaking, but it's all pretty neatly organized.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline12" data-background="./images/shutterstock-programming.jpg" data-background-transition="slide">
+<h2 id="orgheadline12">key APIs</h2>
+</section>
+<section id="slide-orgheadline8" data-background="./images/EnergyNaturalResources.jpg" data-background-transition="slide">
+<h3 id="orgheadline8">resource</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #268bd2;">accounts</span> = blaze.resource<span style="color: #2aa198;">(</span><span style="color: #2aa198;">'postgres://cpa:cpa@server/db::accounts'</span><span style="color: #2aa198;">)</span>
+</pre>
+</div>
+<p>
+Translates a string pointing to data into a Python object pointing to that data.
+</p>
+</section>
+<section id="slide-orgheadline7" data-background="./images/36197.jpg" data-background-transition="slide">
+<h4 id="orgheadline7">new resource types are easy</h4>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #859900; font-weight: bold;">from</span> blaze <span style="color: #859900; font-weight: bold;">import</span> resource
+<span style="color: #859900; font-weight: bold;">from</span> pandas <span style="color: #859900; font-weight: bold;">import</span> read_excel
+
+<span style="color: #b58900;">@resource.register</span><span style="color: #2aa198;">(</span><span style="color: #2aa198;">'.*\.(xls|xlsx)'</span><span style="color: #2aa198;">)</span>
+<span style="color: #859900; font-weight: bold;">def</span> <span style="color: #268bd2;">resource_xls</span><span style="color: #2aa198;">(</span>uri, **kwargs<span style="color: #2aa198;">)</span>:
+    <span style="color: #859900; font-weight: bold;">return</span> read_excel<span style="color: #2aa198;">(</span>uri,  **kwargs<span style="color: #2aa198;">)</span>
+</pre>
+</div>
+<aside class="notes">
+<p>
+This means that adding new Blaze resource types is easy, since you only need to load
+them to some format that Blaze knows how to perform computations on &#x2013; like a DataFrame,
+or a Python data structure like a list of dictionaries.
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline9" data-background="./images/google-datacenter-people-02.jpg" data-background-transition="slide">
+<h3 id="orgheadline9">compute</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #268bd2;">in_debt</span> = blaze.compute<span style="color: #2aa198;">(</span>t<span style="color: #b58900;">[</span>t.balance &lt; 0<span style="color: #b58900;">]</span>, <span style="color: #b58900;">{</span>t: accounts<span style="color: #b58900;">}</span><span style="color: #2aa198;">)</span>
+</pre>
+</div>
+<p>
+Does all the work &#x2013; evaluates an expression against a set of data sources.
+</p>
+</section>
+<section id="slide-orgheadline10" data-background="./images/files-1020481_960_720.jpg" data-background-transition="slide">
+<h3 id="orgheadline10">data</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #268bd2;">accounts</span> = blaze.data<span style="color: #2aa198;">(</span><span style="color: #2aa198;">'postgres://cpa:cpa@server/db::accounts'</span><span style="color: #2aa198;">)</span>
+<span style="color: #268bd2;">in_debt</span> = blaze.compute<span style="color: #2aa198;">(</span>accounts<span style="color: #b58900;">[</span>accounts.balance &lt; 0<span style="color: #b58900;">]</span><span style="color: #2aa198;">)</span>
+</pre>
+</div>
+<p>
+Combines resource &amp; compute &#x2013; extremely handy for interactive exploration.
+</p>
+</section>
+<section id="slide-orgheadline11" data-background="./images/samsung-emoji.png" data-background-transition="slide">
+<h3 id="orgheadline11">expressions</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #859900; font-weight: bold;">from</span> blaze <span style="color: #859900; font-weight: bold;">import</span> join, by, concat, transform, merge, <span style="color: #839496; font-weight: bold;">abs</span>, sqrt,
+sin, sinh, cos, cosh, tan, tanh, exp, expm1, log, log10, radians, \
+degrees, ceil, floor, trunc, isnan, greatest, least, <span style="color: #839496; font-weight: bold;">coerce</span>, distinct,
+<span style="color: #839496; font-weight: bold;">min</span>, <span style="color: #839496; font-weight: bold;">max</span>, mean, std, count, <span style="color: #839496; font-weight: bold;">map</span>
+</pre>
+</div>
+<p>
+Supports a lot of expressions &#x2013; documentation at
+<a href="http://blaze.readthedocs.io/en/latest/api.html#expressions">http://blaze.readthedocs.io/en/latest/api.html#expressions</a>
+doesn't cover all of them, but is a good start.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline16" data-background="./images/KY0344.jpg" data-background-transition="slide">
+<h2 id="orgheadline16">under the hood</h2>
+</section>
+<section id="slide-orgheadline13" data-background="./images/nature_big_tree_hd.jpg" data-background-transition="slide">
+<h3 id="orgheadline13">expressions are trees</h3>
+<p>
+Expressions are internally described as trees of operations.
+</p>
+
+<p>
+Lots of detail at <a href="http://blaze.readthedocs.io/en/latest/expr-design.html">http://blaze.readthedocs.io/en/latest/expr-design.html</a>
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-python">&gt;&gt;&gt; bz.to_tree<span style="color: #2aa198;">(</span>accounts<span style="color: #b58900;">[</span><span style="color: #2aa198;">'$'</span><span style="color: #b58900;">]</span><span style="color: #2aa198;">)</span>
+<span style="color: #2aa198;">{</span>
+  <span style="color: #2aa198;">'op'</span>: <span style="color: #2aa198;">'Field'</span>,
+  <span style="color: #2aa198;">'args'</span>: <span style="color: #b58900;">[</span><span style="color: #268bd2;">{</span>
+      <span style="color: #2aa198;">'op'</span>: <span style="color: #2aa198;">'Symbol'</span>,
+      <span style="color: #2aa198;">'args'</span>: <span style="color: #6c71c4;">[</span><span style="color: #2aa198;">'_2'</span>, dshape<span style="color: #859900;">(</span><span style="color: #2aa198;">"2 * {'$': int64, u: string}"</span><span style="color: #859900;">)</span>, 0<span style="color: #6c71c4;">]</span>
+      <span style="color: #268bd2;">}</span>,
+    <span style="color: #2aa198;">'$'</span><span style="color: #b58900;">]</span>,
+<span style="color: #2aa198;">}</span>
+</pre>
+</div>
+<aside class="notes">
+<p>
+Essentially, Blaze expressions are symbolic representations of queries &#x2013; a domain-
+specific language of their own. This means you can transform or store them, and more!
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline14" data-background="./images/Pipeline032415.jpeg" data-background-transition="slide">
+<h3 id="orgheadline14">pipeline</h3>
+<p>
+<a href="http://blaze.readthedocs.io/en/latest/computation.html">http://blaze.readthedocs.io/en/latest/computation.html</a>
+</p>
+
+<ol>
+<li><code>pre_compute</code> all the leaves of the tree that represent data</li>
+<li><code>optimize</code> the expression</li>
+<li>Try calling <code>compute_down</code> on the entire expression tree</li>
+<li>Otherwise, traverse up the tree from the leaves, calling <code>compute_up</code>.
+Repeat this until the data significantly changes type (e.g. list to int
+after a sum operation)</li>
+<li>Reevaluate <code>optimize</code> on the expression and <code>pre_compute</code> on all data elements.</li>
+<li>Go to step 3</li>
+<li>Call <code>post_compute</code> on the result</li>
+
+</ol>
+<aside class="notes">
+<ol>
+<li>This can, for instance, load data into memory</li>
+<li>Doesn't need explaining</li>
+<li>This lets us process whole chunks of the tree, if we can. For instance,
+a distributed processing backend could restructure the tree here and send
+off whole sub-expressions to be run on different workers.</li>
+<li>This is the most common function in Blaze, and encodes most of the logic, since
+it operates on the smallest and simplest units. For instance, addition would be
+a compute<sub>up</sub> operation that expected two leaf nodes containing numbers.</li>
+<li>This happens when the shape of the data we're processing has changed enough that
+it's probably worth a re-optimize &#x2013; there might be a shortcut we can take on the
+new structure we couldn't on the old.</li>
+<li>&lt;null&gt;</li>
+<li>This handles the data once computation has been done. In the case of the SQL
+backend, for instance, the computation portion is really constructing an SQL query,
+and it's this that sends it off to the server and collects the results.</li>
+
+</ol>
+
+</aside>
+</section>
+<section id="slide-orgheadline15" data-background="./images/B9317500634Z.1_20150601144416_000_G7LAUI2O9.1-0.jpg" data-background-transition="slide">
+<h3 id="orgheadline15">multiple dispatch</h3>
+<p>
+Internally, a lot of Blaze is implemented as simple functions that handle
+just one combination of possible inputs to an expression &#x2013; like here, we see
+the case where we're computing a selection on pure-Python data.
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b58900;">@dispatch</span><span style="color: #2aa198;">(</span>Selection, Sequence, Sequence<span style="color: #2aa198;">)</span>
+<span style="color: #859900; font-weight: bold;">def</span> <span style="color: #268bd2;">compute_up</span><span style="color: #2aa198;">(</span>expr, seq, predicate, **kwargs<span style="color: #2aa198;">)</span>:
+    <span style="color: #268bd2;">preds</span> = <span style="color: #839496; font-weight: bold;">iter</span><span style="color: #2aa198;">(</span>predicate<span style="color: #2aa198;">)</span>
+    <span style="color: #859900; font-weight: bold;">return</span> <span style="color: #839496; font-weight: bold;">filter</span><span style="color: #2aa198;">(</span><span style="color: #859900; font-weight: bold;">lambda</span> _: <span style="color: #839496; font-weight: bold;">next</span><span style="color: #b58900;">(</span>preds<span style="color: #b58900;">)</span>, seq<span style="color: #2aa198;">)</span>
+</pre>
+</div>
+<p>
+(the decorator is from <code>multipledispatch</code>)
+</p>
+<aside class="notes">
+<p>
+As you see, it's a pretty straightforward function. We're expecting two sequences,
+one of which is our data and one of which is a predicate (i.e. Boolean, include-or-
+exclude) column, and we just zip them up and filter out the ones with a False-y
+predicate.
+</p>
+
+<p>
+Of course, computing any arbitrary selection involves much more than just filtering
+based on sequences, but this approach allows us to implement one set of operations at
+a time. It also gives us a hint into how backends are implemented: there are handler
+functions for computations for different backend data types (from SQLAlchemy <code>Selectable</code>
+to NumPy <code>ndarray</code>). Thus adding backend support can be as simple as adding handlers for
+a few computations, or as complex as implementing all the supported expressions on a
+new set of data types.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline17" data-background="./images/shutterstock_128351045.jpg" data-background-transition="slide">
+<h2 id="orgheadline17">client-server for the win</h2>
+<ul>
+<li><code>blaze.server.Server</code> can host your data</li>
+<li><code>blaze.server.Client</code> can be your API</li>
+
+</ul>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #268bd2;">accounts</span> = data<span style="color: #2aa198;">(</span><span style="color: #2aa198;">'blaze://accounts.bank.com:6363'</span><span style="color: #2aa198;">)</span>
+<span style="color: #268bd2;">in_debt</span> = accounts<span style="color: #2aa198;">[</span>accounts.balance &lt; 0<span style="color: #2aa198;">]</span>
+</pre>
+</div>
+<aside class="notes">
+<p>
+Combine the Blaze resource concept with a simple REST API and you have the Blaze
+server, which can host references to your data and abstract them away from you. The
+Blaze client acts like any other Blaze resource, except when it computes things it
+actually sends the serialized expression over to the server, where it's executed, and
+results streamed back.
+</p>
+
+<p>
+This would let us do a number of things, like put computational work on a powerful
+server that can host datasets in RAM, or on a server with the necessary database
+access tokens so your workstations don't all need access.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline20" data-background="./images/realtime-api.png" data-background-transition="slide">
+<h2 id="orgheadline20">components &amp; ecosystem</h2>
+<aside class="notes">
+<p>
+We've seen some hints of the libraries that Blaze itself is built on top of, and
+that form part of the same ecosystem of data-processing tools. The most independently
+useful of these <span class="underline">at the moment</span> is &#x2026;
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline18" data-background="./images/conversions.png" data-background-transition="slide">
+<h3 id="orgheadline18">odo</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #268bd2;">df</span> = odo.odo<span style="color: #2aa198;">(</span><span style="color: #2aa198;">'accounts.csv'</span>, <span style="color: #2aa198;">'postgresql://accounts::db'</span><span style="color: #2aa198;">)</span>
+</pre>
+</div>
+<aside class="notes">
+<p>
+Who knows where this name came from? Odo is a shapeshifter from Star Trek: Deep Space
+Nine, and the library lets your data shapeshift as well. It knows how to convert a
+number of formats directly to each other &#x2013; for instance, the CSV-to-SQL above uses
+the database's built-in fast file loading methods &#x2013; and uses a graph of conversions
+to convert most formats to each other. In other words, even if it doesn't have the
+format-A-to-format-B conversion, it probably has A-to-C, and C-to-B, so it can do it
+that way.
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline19" data-background="./images/3d-platonic-solids-a4.jpg" data-background-transition="slide">
+<h3 id="orgheadline19">datashape</h3>
+<div class="org-src-container">
+
+<pre  class="src src-javascript"><span style="color: #859900; font-weight: bold;">var</span> * <span style="color: #2aa198;">{</span> name: string, balance: float64 <span style="color: #2aa198;">}</span>
+</pre>
+</div>
+<aside class="notes">
+<p>
+Datashape just describes the shape of your data &#x2013; a bit like a type system for it,
+and in the case of Blaze it allows optimizations and validation to happen. It's also
+very useful for generally operating on data with a bit more confidence than the soup
+of unstructured CSVs usually provides. If you're interested in learning more, the
+DyND project is a good place to look.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline24" data-background="./images/flwr-large.jpg" data-background-transition="slide">
+<h2 id="orgheadline24">downsides</h2>
+<aside class="notes">
+<p>
+I've been singing the praises of Blaze, but obviously it has limitations, and I
+don't want anyone to go away thinking it can do everything and then getting disappointed
+when it can't.
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline21" data-background="./images/boy-sulking-or-angry-expression.jpg" data-background-transition="slide">
+<h3 id="orgheadline21">what it doesn't do</h3>
+<ul>
+<li>Clean up your messy data</li>
+<li>Most SciPy / SciKit operations</li>
+<li>Make your existing data-handling code parallel</li>
+<li>Make everything super fast</li>
+
+</ul>
+
+<p>
+<a href="http://blaze.readthedocs.io/en/latest/what-blaze-isnt.html">http://blaze.readthedocs.io/en/latest/what-blaze-isnt.html</a>
+</p>
+<aside class="notes">
+<ol>
+<li>Although you can use Blaze to write your cleaning scripts</li>
+<li>Generally out of scope, although if you'd like to contribute them or
+build on top of Blaze that'd be great.</li>
+<li>There are some optimizations that Blaze might be able to apply, but it
+doesn't make things automagically parallel. It just doesn't know enough,
+usually, about your application.</li>
+<li>Blaze constructs queries and formulas for different backends &#x2013; it may
+apply <span class="underline">some</span> optimizations, but it will e.g. almost never beat hand-tuned
+SQL.</li>
+
+</ol>
+
+</aside>
+</section>
+<section id="slide-orgheadline22" data-background="./images/Banded_Mongoose_XSC2581.jpg" data-background-transition="slide">
+<h3 id="orgheadline22">poor mongodb support</h3>
+<aside class="notes">
+<p>
+As we noticed looking through the examples, the MongoDB support isn't the best &#x2013;
+there are lots of things missing. I personally am not that bothered, since I don't
+really use (or like) MongoDB, but a lot of people do like it and want to use it for
+analytical stuff.
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline23" data-background="./images/ladybugs.jpg" data-background-transition="slide">
+<h3 id="orgheadline23">debugging can be tough</h3>
+<aside class="notes">
+<p>
+Because of the multiple dispatch tricks I've already mentioned, and because it's
+designed to compute across potentially large datasets and so makes heavy use of
+generators, it can be a bear to debug.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline25" data-background="./images/f489332d094f9f4edf9aaf23399a7ea1.jpg" data-background-transition="slide">
+<h2 id="orgheadline25">thanks</h2>
+<p>
+<i>contact: @necaris</i>
+</p>
+<aside class="notes">
+<p>
+Any questions? Comments? Wisecracks? Ask me anything! Full disclosure: Blaze is
+supported by my employer, Continuum Analytics. It's fully open-source, under a
+permissive license!
+</p>
+
+</aside>
+</section>
+</section>
+</div>
+</div>
+<script src="http://127.0.0.1:8000/reveal.js/lib/js/head.min.js"></script>
+<script src="http://127.0.0.1:8000/reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c/t',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'http://127.0.0.1:8000/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>

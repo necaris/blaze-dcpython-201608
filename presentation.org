@@ -1,0 +1,430 @@
+#+REVEAL_THEME: night
+#+REVEAL_ROOT: http://127.0.0.1:8000/reveal.js/
+#+REVEAL_EXTRA_CSS: http://127.0.0.1:8000/style.css
+#+OPTIONS: reveal_title_slide:nil toc:nil num:nil reveal_slide_number:c/t
+
+* =import blaze=
+  :PROPERTIES:
+  :reveal_background: ./images/Fire_Blaze.jpg
+  :reveal_background_trans: slide
+  :END:
+  time for flexible data
+
+#+BEGIN_NOTES
+Hi everyone, I'm Rami, and I'm going to talk about ETL. Who loves ETL scripts?
+
+No one? OK, well, Blaze is a library that lets you avoid that sort of
+thing. Because I like structure in my presentations, I'm going to lay things out
+in advance: We'll take a look at what the library can do, why you might be
+interested, then delve a little into how it works and what other related work to
+take a look at.
+
+There will be links in the slides, and I'll make this (and the accompanying Jupyter
+notebook) available later on.
+#+END_NOTES
+
+* [[./images/blaze_med.png]]
+  :PROPERTIES:
+  :reveal_background: ./images/Ku4Vg2e.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_QUOTE
+Blaze presents a pleasant and familiar interface to us regardless of what
+computational solution or database we use (e.g. Spark, Impala, SQL databases,
+No-SQL data-stores, raw-files). One Blaze query can work across data ranging
+from a CSV file to a distributed database.
+#+END_QUOTE
+#+BEGIN_NOTES
+I'm going to let the marketing spiel from the website do the talking for me for
+part of this.
+
+Now, you might be thinking -- OK, so one query works across different systems, but
+what form does that query take? Do we really need _another_ DSL? Well, Blaze uses the
+NumPy / Pandas DataFrame syntax for the most part, and translates the operations
+to whatever makes sense for the underlying data store.
+#+END_NOTES
+
+* introducing kinabalu
+  :PROPERTIES:
+  :reveal_background: ./images/kinabalu-rainforest-borneo-mlsy-00455.jpg
+  :reveal_background_trans: slide
+  :END:
+  #+ATTR_REVEAL: :frag fade-in
+  It's a bookstore! We've got:
+  #+ATTR_REVEAL: :frag (fade-in fade-in fade-in fade-in)
+   * books (Mongo)
+   * users & their libraries (Postgres)
+   * purchase history (CSV)
+   * server logs (HTTP)
+
+#+BEGIN_NOTES
+Talks are no fun without examples! For the purposes of this talk, we're going to
+pretend we're working on an online bookstore named after a rainforest. We have:
+- books in MongoDB, so we can manage them easily and serve them fast
+- user profiles & libraries in PostgreSQL, because we don't want to lose them
+- a purchase history data dump, in CSV, because we're letting someone else
+  handle payments
+- web server logs, from Kibana or something -- we're accessing it in CSV format,
+  but JSON is just as good a format (well, I say that, but in the process of preparing
+  this talk I found a bug, which I've opened an issue for...)
+#+END_NOTES
+
+* let's look at it
+  :PROPERTIES:
+  :reveal_background: ./images/data_visualization1.jpg
+  :reveal_background_trans: slide
+  :END:
+  /(open notebook, fiddle, watch things break...)/
+#+BEGIN_NOTES
+Let's have a look at this data, by loading it all into Blaze, and doing some
+simple exploratory queries on it. This is the live-coding part of the talk,
+where things traditionally go horribly wrong. I've mitigated this by
+#+END_NOTES
+
+* mixing it up
+  :PROPERTIES:
+  :reveal_background: ./images/database_800.jpeg
+  :reveal_background_trans: slide
+  :END:
+  things get really interesting when you can query across data sources,
+  as more and more people have to do
+
+  /(open notebook again, see more things break...)/
+#+BEGIN_NOTES
+Now, some of you might be wondering why it wasn't all in Postgres to begin
+with. It can handle all kinds of data (whatever Uber says). Or AWS Redshift.
+But this is more akin to a real-world scenario, where for lots of reasons
+things are in different places.
+
+This is where we find out some of the real power of Blaze, which is going
+to let us combine our data interestingly.
+
+(discuss notebook)
+Note: the queries are messy and complicated. This is what happens with data.
+Many people can make use of these conclusions -- even devops can use the download
+time insights to figure out whether it's worth setting up a node in AWS Alaska.
+
+A happy side effect of doing this in Blaze is that Blaze is optimizing our
+query for us, pushing down the query as far as it can into each backend, so
+that it has to do the least amount of work in-process.
+
+It's also worth noting that any of these queries can be trivially translated
+to fully run on the appropriate backend, so your analysis on a Pandas dataframe here
+can be executed on your Redshift cluster by changing a single parameter.
+#+END_NOTES
+
+* backends
+  :PROPERTIES:
+  :reveal_background: ./images/2009_3962573662_card_catalog.jpg
+  :reveal_background_trans: slide
+  :END:
+  - CSV
+  - HDF5
+  - SQL (using SQLAlchemy)
+  - JSON
+  - MongoDB
+  - HTTP URIs (if the resource is in a supported format)
+  - Spark (PySpark, SparkSQL)
+  - bcolz
+#+BEGIN_NOTES
+Blaze currently supports a range of file formats and storage systems -- as you can see,
+it's by no means comprehensive, but it covers most if not all of the data we often deal
+with on a regular basis. Adding support for another backend can be easy -- we'll look at
+an easy example shortly -- or a big undertaking, but it's all pretty neatly organized.
+#+END_NOTES
+
+* key APIs
+  :PROPERTIES:
+  :reveal_background: ./images/shutterstock-programming.jpg
+  :reveal_background_trans: slide
+  :END:
+** resource
+  :PROPERTIES:
+  :reveal_background: ./images/EnergyNaturalResources.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_SRC python
+accounts = blaze.resource('postgres://cpa:cpa@server/db::accounts')
+#+END_SRC
+Translates a string pointing to data into a Python object pointing to that data.
+*** new resource types are easy
+  :PROPERTIES:
+  :reveal_background: ./images/36197.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_SRC python
+from blaze import resource
+from pandas import read_excel
+
+@resource.register('.*\.(xls|xlsx)')
+def resource_xls(uri, **kwargs):
+    return read_excel(uri,  **kwargs)
+#+END_SRC
+#+BEGIN_NOTES
+This means that adding new Blaze resource types is easy, since you only need to load
+them to some format that Blaze knows how to perform computations on -- like a DataFrame,
+or a Python data structure like a list of dictionaries.
+#+END_NOTES
+** compute
+  :PROPERTIES:
+  :reveal_background: ./images/google-datacenter-people-02.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_SRC python
+in_debt = blaze.compute(t[t.balance < 0], {t: accounts})
+#+END_SRC
+Does all the work -- evaluates an expression against a set of data sources.
+** data
+  :PROPERTIES:
+  :reveal_background: ./images/files-1020481_960_720.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_SRC python
+accounts = blaze.data('postgres://cpa:cpa@server/db::accounts')
+in_debt = blaze.compute(accounts[accounts.balance < 0])
+#+END_SRC
+Combines resource & compute -- extremely handy for interactive exploration.
+** expressions
+  :PROPERTIES:
+  :reveal_background: ./images/samsung-emoji.png
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_SRC python
+from blaze import join, by, concat, transform, merge, abs, sqrt,
+sin, sinh, cos, cosh, tan, tanh, exp, expm1, log, log10, radians, \
+degrees, ceil, floor, trunc, isnan, greatest, least, coerce, distinct,
+min, max, mean, std, count, map
+#+END_SRC
+Supports a lot of expressions -- documentation at
+http://blaze.readthedocs.io/en/latest/api.html#expressions
+doesn't cover all of them, but is a good start.
+
+* under the hood
+  :PROPERTIES:
+  :reveal_background: ./images/KY0344.jpg
+  :reveal_background_trans: slide
+  :END:
+** expressions are trees
+  :PROPERTIES:
+  :reveal_background: ./images/nature_big_tree_hd.jpg
+  :reveal_background_trans: slide
+  :END:
+Expressions are internally described as trees of operations.
+
+Lots of detail at http://blaze.readthedocs.io/en/latest/expr-design.html
+#+BEGIN_SRC python
+>>> bz.to_tree(accounts['$'])
+{
+  'op': 'Field',
+  'args': [{
+      'op': 'Symbol',
+      'args': ['_2', dshape("2 * {'$': int64, u: string}"), 0]
+      },
+    '$'],
+}
+#+END_SRC
+#+BEGIN_NOTES
+Essentially, Blaze expressions are symbolic representations of queries -- a domain-
+specific language of their own. This means you can transform or store them, and more!
+#+END_NOTES
+** pipeline
+  :PROPERTIES:
+  :reveal_background: ./images/Pipeline032415.jpeg
+  :reveal_background_trans: slide
+  :END:
+http://blaze.readthedocs.io/en/latest/computation.html
+
+1. =pre_compute= all the leaves of the tree that represent data
+2. =optimize= the expression
+3. Try calling =compute_down= on the entire expression tree
+4. Otherwise, traverse up the tree from the leaves, calling =compute_up=.
+   Repeat this until the data significantly changes type (e.g. list to int
+   after a sum operation)
+5. Reevaluate =optimize= on the expression and =pre_compute= on all data elements.
+6. Go to step 3
+7. Call =post_compute= on the result
+#+BEGIN_NOTES
+1. This can, for instance, load data into memory
+2. Doesn't need explaining
+3. This lets us process whole chunks of the tree, if we can. For instance,
+   a distributed processing backend could restructure the tree here and send
+   off whole sub-expressions to be run on different workers.
+4. This is the most common function in Blaze, and encodes most of the logic, since
+   it operates on the smallest and simplest units. For instance, addition would be
+   a compute_up operation that expected two leaf nodes containing numbers.
+5. This happens when the shape of the data we're processing has changed enough that
+   it's probably worth a re-optimize -- there might be a shortcut we can take on the
+   new structure we couldn't on the old.
+6. <null>
+7. This handles the data once computation has been done. In the case of the SQL
+   backend, for instance, the computation portion is really constructing an SQL query,
+   and it's this that sends it off to the server and collects the results.
+#+END_NOTES
+** multiple dispatch
+  :PROPERTIES:
+  :reveal_background: ./images/B9317500634Z.1_20150601144416_000_G7LAUI2O9.1-0.jpg
+  :reveal_background_trans: slide
+  :END:
+Internally, a lot of Blaze is implemented as simple functions that handle
+just one combination of possible inputs to an expression -- like here, we see
+the case where we're computing a selection on pure-Python data.
+#+BEGIN_SRC python
+@dispatch(Selection, Sequence, Sequence)
+def compute_up(expr, seq, predicate, **kwargs):
+    preds = iter(predicate)
+    return filter(lambda _: next(preds), seq)
+#+END_SRC
+(the decorator is from =multipledispatch=)
+#+BEGIN_NOTES
+As you see, it's a pretty straightforward function. We're expecting two sequences,
+one of which is our data and one of which is a predicate (i.e. Boolean, include-or-
+exclude) column, and we just zip them up and filter out the ones with a False-y
+predicate.
+
+Of course, computing any arbitrary selection involves much more than just filtering
+based on sequences, but this approach allows us to implement one set of operations at
+a time. It also gives us a hint into how backends are implemented: there are handler
+functions for computations for different backend data types (from SQLAlchemy =Selectable=
+to NumPy =ndarray=). Thus adding backend support can be as simple as adding handlers for
+a few computations, or as complex as implementing all the supported expressions on a
+new set of data types.
+#+END_NOTES
+
+* client-server for the win
+  :PROPERTIES:
+  :reveal_background: ./images/shutterstock_128351045.jpg
+  :reveal_background_trans: slide
+  :END:
+  - =blaze.server.Server= can host your data
+  - =blaze.server.Client= can be your API
+#+BEGIN_SRC python
+accounts = data('blaze://accounts.bank.com:6363')
+in_debt = accounts[accounts.balance < 0]
+#+END_SRC
+#+BEGIN_NOTES
+Combine the Blaze resource concept with a simple REST API and you have the Blaze
+server, which can host references to your data and abstract them away from you. The
+Blaze client acts like any other Blaze resource, except when it computes things it
+actually sends the serialized expression over to the server, where it's executed, and
+results streamed back.
+
+This would let us do a number of things, like put computational work on a powerful
+server that can host datasets in RAM, or on a server with the necessary database
+access tokens so your workstations don't all need access.
+#+END_NOTES
+
+* components & ecosystem
+  :PROPERTIES:
+  :reveal_background: ./images/realtime-api.png
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_NOTES
+We've seen some hints of the libraries that Blaze itself is built on top of, and
+that form part of the same ecosystem of data-processing tools. The most independently
+useful of these _at the moment_ is ...
+#+END_NOTES
+** odo
+  :PROPERTIES:
+  :reveal_background: ./images/conversions.png
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_SRC python
+df = odo.odo('accounts.csv', 'postgresql://accounts::db')
+#+END_SRC
+#+BEGIN_NOTES
+Who knows where this name came from? Odo is a shapeshifter from Star Trek: Deep Space
+Nine, and the library lets your data shapeshift as well. It knows how to convert a
+number of formats directly to each other -- for instance, the CSV-to-SQL above uses
+the database's built-in fast file loading methods -- and uses a graph of conversions
+to convert most formats to each other. In other words, even if it doesn't have the
+format-A-to-format-B conversion, it probably has A-to-C, and C-to-B, so it can do it
+that way.
+#+END_NOTES
+** datashape
+  :PROPERTIES:
+  :reveal_background: ./images/3d-platonic-solids-a4.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_SRC javascript
+var * { name: string, balance: float64 }
+#+END_SRC
+#+BEGIN_NOTES
+Datashape just describes the shape of your data -- a bit like a type system for it,
+and in the case of Blaze it allows optimizations and validation to happen. It's also
+very useful for generally operating on data with a bit more confidence than the soup
+of unstructured CSVs usually provides. If you're interested in learning more, the
+DyND project is a good place to look.
+#+END_NOTES
+
+* downsides
+  :PROPERTIES:
+  :reveal_background: ./images/flwr-large.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_NOTES
+I've been singing the praises of Blaze, but obviously it has limitations, and I
+don't want anyone to go away thinking it can do everything and then getting disappointed
+when it can't.
+#+END_NOTES
+** what it doesn't do
+  :PROPERTIES:
+  :reveal_background: ./images/boy-sulking-or-angry-expression.jpg
+  :reveal_background_trans: slide
+  :END:
+   - Clean up your messy data
+   - Most SciPy / SciKit operations
+   - Make your existing data-handling code parallel
+   - Make everything super fast
+
+   http://blaze.readthedocs.io/en/latest/what-blaze-isnt.html
+#+BEGIN_NOTES
+1. Although you can use Blaze to write your cleaning scripts
+2. Generally out of scope, although if you'd like to contribute them or
+   build on top of Blaze that'd be great.
+3. There are some optimizations that Blaze might be able to apply, but it
+   doesn't make things automagically parallel. It just doesn't know enough,
+   usually, about your application.
+4. Blaze constructs queries and formulas for different backends -- it may
+   apply _some_ optimizations, but it will e.g. almost never beat hand-tuned
+   SQL.
+#+END_NOTES
+** poor mongodb support
+  :PROPERTIES:
+  :reveal_background: ./images/Banded_Mongoose_XSC2581.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_NOTES
+As we noticed looking through the examples, the MongoDB support isn't the best --
+there are lots of things missing. I personally am not that bothered, since I don't
+really use (or like) MongoDB, but a lot of people do like it and want to use it for
+analytical stuff.
+#+END_NOTES
+** debugging can be tough
+  :PROPERTIES:
+  :reveal_background: ./images/ladybugs.jpg
+  :reveal_background_trans: slide
+  :END:
+#+BEGIN_NOTES
+Because of the multiple dispatch tricks I've already mentioned, and because it's
+designed to compute across potentially large datasets and so makes heavy use of
+generators, it can be a bear to debug.
+#+END_NOTES
+
+* thanks
+  :PROPERTIES:
+  :reveal_background: ./images/f489332d094f9f4edf9aaf23399a7ea1.jpg
+  :reveal_background_trans: slide
+  :END:
+  /contact: @necaris/
+#+BEGIN_NOTES
+Any questions? Comments? Wisecracks? Ask me anything! Full disclosure: Blaze is
+supported by my employer, Continuum Analytics. It's fully open-source, under a
+permissive license!
+#+END_NOTES
+
+* TODO: [/]
+  - [ ] move source data to source-data dir
+  - [ ] add extract-and-load scripts for DBs
+  - [ ] export presentation to web-renderable
+  - [ ] push to public repo
+  - [ ] fiddle with seeing reveal.js presentations on github -- GH Pages?
