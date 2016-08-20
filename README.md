@@ -5,13 +5,17 @@ the slides, accompanying Jupyter notebook, and all the necessary data to execute
 demo code.
 
 The full demo requires:
-    - a Python environment with Jupyter notebook functionality, and all the dependencies
-      installed -- the included `environment.yml` file can be used to create such an
-      environment with `conda`.
-    - a MongoDB database running locally. Demo data can be loaded into MongoDB using
-      the `mongorestore` command, and using the `source-data/mongodb` data dump.
-    - a PostgreSQL database running locally. Demo data can be loaded into PostgreSQL
-      with the `psql` tool, using the `source-data/users_and_books.sql` data dump, into
-      a database named `kinabalu`. The local user `appuser` should be defined, with
-      the password `apppass`.
-    - the `serve-logs.py` script running locally.
+
+- a Python environment with Jupyter notebook functionality, and all the dependencies
+  installed -- the included `environment.yml` file can be used to create such an
+  environment with `conda`.
+
+- a MongoDB database running locally. Demo data can be loaded into MongoDB using
+  the `mongorestore` command, and using the `source-data/mongodb` data dump.
+
+- a PostgreSQL database running locally. Demo data can be loaded into PostgreSQL
+  with the `psql` tool, using the `source-data/users_and_books.sql` data dump, into
+  a database named `kinabalu`. The local user `appuser` should be defined, with
+  the password `apppass`.
+
+- the `serve-logs.py` script running locally.
