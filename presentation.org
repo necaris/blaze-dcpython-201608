@@ -421,10 +421,3 @@ Any questions? Comments? Wisecracks? Ask me anything! Full disclosure: Blaze is
 supported by my employer, Continuum Analytics. It's fully open-source, under a
 permissive license!
 #+END_NOTES
-
-* TODO: [/]
-  - [ ] move source data to source-data dir
-  - [ ] add extract-and-load scripts for DBs
-  - [ ] export presentation to web-renderable
-  - [ ] push to public repo
-  - [ ] fiddle with seeing reveal.js presentations on github -- GH Pages?
