@@ -4,6 +4,9 @@ This was a presentation given at DC Python in August 2016 -- the repository cont
 the slides, accompanying Jupyter notebook, and all the necessary data to execute the
 demo code.
 
+The slides are easiest viewed [via GitHub Pages](https://necaris.github.io/blaze-dcpython-201608),
+although the speaker notes are probably easiest to read in the `presentation.org` file.
+
 The full demo requires:
 
 - a Python environment with Jupyter notebook functionality, and all the dependencies
