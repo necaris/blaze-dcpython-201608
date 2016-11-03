@@ -7,11 +7,11 @@
 <style type="text/css">
 .underline { text-decoration: underline; }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/2.6.2/css/reveal.css"/>
+<link rel="stylesheet" href="http://127.0.0.1:8000/reveal.js/css/reveal.css"/>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/2.6.2/css/theme/night.css" id="theme"/>
+<link rel="stylesheet" href="http://127.0.0.1:8000/reveal.js/css/theme/night.css" id="theme"/>
 
-<link rel="stylesheet" href="/style.css"/>
+<link rel="stylesheet" href="http://127.0.0.1:8000/style.css"/>
 
 <!-- If the query includes 'print-pdf', include the PDF print sheet -->
 <script>
@@ -19,7 +19,7 @@
         var link = document.createElement( 'link' );
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'https://cdn.jsdelivr.net/reveal.js/2.6.2/css/print/pdf.css';
+        link.href = 'http://127.0.0.1:8000/reveal.js/css/print/pdf.css';
         document.getElementsByTagName( 'head' )[0].appendChild( link );
     }
 </script>
@@ -129,7 +129,8 @@ this talk I found a bug, which I've opened an issue for&#x2026;)</li>
 <p>
 Let's have a look at this data, by loading it all into Blaze, and doing some
 simple exploratory queries on it. This is the live-coding part of the talk,
-where things traditionally go horribly wrong. I've mitigated this by
+where things traditionally go horribly wrong. I've mitigated this by putting
+everything in a Jupyter notebook.
 </p>
 
 </aside>
@@ -569,8 +570,8 @@ permissive license!
 </section>
 </div>
 </div>
-<script src="https://cdn.jsdelivr.net/reveal.js/2.6.2/lib/js/head.min.js"></script>
-<script src="https://cdn.jsdelivr.net/reveal.js/2.6.2/js/reveal.js"></script>
+<script src="http://127.0.0.1:8000/reveal.js/lib/js/head.min.js"></script>
+<script src="http://127.0.0.1:8000/reveal.js/js/reveal.js"></script>
 
 <script>
 // Full list of configuration options available here:
@@ -597,11 +598,11 @@ multiplex: {
 
 // Optional libraries used to extend on reveal.js
 dependencies: [
- { src: 'https://cdn.jsdelivr.net/reveal.js/2.6.2/lib/js/classList.js', condition: function() { return !document.body.classList; } },
- { src: 'https://cdn.jsdelivr.net/reveal.js/2.6.2/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
- { src: 'https://cdn.jsdelivr.net/reveal.js/2.6.2/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
- { src: 'https://cdn.jsdelivr.net/reveal.js/2.6.2/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
- { src: 'https://cdn.jsdelivr.net/reveal.js/2.6.2/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+ { src: 'http://127.0.0.1:8000/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://127.0.0.1:8000/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
 });
 </script>
 </body>

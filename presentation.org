@@ -78,7 +78,8 @@ pretend we're working on an online bookstore named after a rainforest. We have:
 #+BEGIN_NOTES
 Let's have a look at this data, by loading it all into Blaze, and doing some
 simple exploratory queries on it. This is the live-coding part of the talk,
-where things traditionally go horribly wrong. I've mitigated this by
+where things traditionally go horribly wrong. I've mitigated this by putting
+everything in a Jupyter notebook.
 #+END_NOTES
 
 * mixing it up
